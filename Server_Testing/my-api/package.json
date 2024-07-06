@@ -10,8 +10,8 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "cors": "^2.8.5",
     "express": "^4.19.2",
-    "mongoose": "^8.4.1",
     "mysql2": "^3.10.1",
     "sequelize": "^6.37.3",
     "uuid": "^10.0.0"

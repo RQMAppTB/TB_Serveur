@@ -1,18 +1,16 @@
 version: '3.8'
 
 services:
-  web:
-    build: .
+
+  api:
+    build: ./server
     ports:
       - "3000:3000"
-    volumes:
-      - .:/usr/src/app
-      - /usr/src/app/node_modules
     environment:
       DB_HOST: db
-      DB_USER: user
-      DB_PASSWORD: password
-      DB_NAME: mydbtest
+      DB_USER: root
+      DB_PASSWORD: rootpassword
+      DB_NAME: mydb
     depends_on:
       db:
         condition: service_healthy
@@ -21,15 +19,15 @@ services:
     image: mysql:5.7
     environment:
       MYSQL_ROOT_PASSWORD: rootpassword
-      MYSQL_DATABASE: mydbtest
+      MYSQL_DATABASE: mydb
     volumes:
-      - db-data-a:/var/lib/mysql
+      - db-data:/var/lib/mysql
     ports:
       - "3306:3306"
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
-      timeout: 5s
-      retries: 50
+      timeout: 2s
+      retries: 100
 
   phpmyadmin:
     image: phpmyadmin/phpmyadmin
@@ -40,4 +38,4 @@ services:
       - "8080:80"
 
 volumes:
-  db-data-a:
+  db-data:
