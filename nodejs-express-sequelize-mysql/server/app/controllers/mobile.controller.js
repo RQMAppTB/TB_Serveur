@@ -13,7 +13,7 @@ exports.five0one = (req, res) => {
 exports.ident = async (req, res) => {
    const dosNum = parseInt(req.query.dosNumber);
 
-   let url = new URL('https://www.larouequimarche.ch/wp-admin/admin-ajax.php');
+   let url = new URL(process.env.RQM_SERV);
    url.searchParams.append('action', "get_username");
    url.searchParams.append('dossard', dosNum.toString().padStart(4, '0'));
 
@@ -95,11 +95,16 @@ exports.login = async (req, res) => {
    }
 }
 
-exports.start = async (req, res) => {
+exports.start = (req, res) => {
    const dosNum = parseInt(req.body.dosNumber);
    const name = req.body.name;
 
    console.log('Starting user with dosNumber: ' + dosNum);
+
+   if (!dosNum || !name) {
+      res.status(400).send('Malformed request');
+      return;
+   }
 
    // Generate a new UUID
    let _myUuid = uuid.v4();
@@ -108,7 +113,7 @@ exports.start = async (req, res) => {
    //_myUuid = "04610a98-5cef-4201-b7aa-e5d9ac293055";
 
 
-   await UserMeasure.create({
+   UserMeasure.create({
       myUuid: _myUuid,
       dosNumber: dosNum,
       distTraveled: 0,
@@ -122,7 +127,7 @@ exports.start = async (req, res) => {
       };
 
 
-      let url = new URL('https://www.larouequimarche.ch/wp-admin/admin-ajax.php');
+      let url = new URL(process.env.RQM_SERV);
       url.searchParams.append('action', "save_notification");
       url.searchParams.append('utilisateur', name);
       url.searchParams.append('dossard', dosNum.toString().padStart(4, '0'));
@@ -187,7 +192,7 @@ exports.stop = async (req, res) => {
                   redirect: "follow"
                };
 
-               let url = new URL('https://www.larouequimarche.ch/wp-admin/admin-ajax.php');
+               let url = new URL(process.env.RQM_SERV);
                url.searchParams.append('action', "save_notification");
                url.searchParams.append('utilisateur', user.name);
                url.searchParams.append('dossard', user.dosNumber.toString().padStart(4, '0'));

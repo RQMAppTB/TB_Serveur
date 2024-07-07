@@ -23,7 +23,6 @@ db.sequelize.sync()//{ force: true})
 // });
 
 
-require("./app/routes/turorial.routes")(app);
 require("./app/routes/mobile.routes")(app);
 require("./app/routes/admin.routes")(app);
 

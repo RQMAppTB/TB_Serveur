@@ -1,4 +1,4 @@
-const dbConfig = require("../config/db.config.js");
+//const dbConfig = require("../config/db.config.js");
 const Sequelize = require("sequelize");
 
 const sequelize = new Sequelize(process.env.DB_NAME, process.env.DB_USER, process.env.DB_PASSWORD, {
@@ -11,7 +11,6 @@ const db = {};
 db.Sequelize = Sequelize;
 db.sequelize = sequelize;
 
-db.tutorials = require("./tutorial.model.js")(sequelize, Sequelize);
 db.users = require("./users.model.js")(sequelize, Sequelize);
 db.user_measure = require("./user_measure.model.js")(sequelize, Sequelize);
 

@@ -6,11 +6,13 @@ services:
     build: ./server
     ports:
       - "3000:3000"
-    environment:
-      DB_HOST: db
-      DB_USER: root
-      DB_PASSWORD: rootpassword
-      DB_NAME: mydb
+    env_file: "server/.env"
+    #environment:
+    #  DB_HOST: db
+    #  DB_USER: root
+    #  DB_PASSWORD: rootpassword
+    #  DB_NAME: mydb
+    #  RQM_SERV: https://www.larouequimarche.ch/wp-admin/admin-ajax.php
     depends_on:
       db:
         condition: service_healthy
