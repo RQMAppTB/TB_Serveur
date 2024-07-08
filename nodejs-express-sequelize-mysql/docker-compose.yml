@@ -6,16 +6,12 @@ services:
     build: ./server
     ports:
       - "3000:3000"
-    env_file: "server/.env"
-    #environment:
-    #  DB_HOST: db
-    #  DB_USER: root
-    #  DB_PASSWORD: rootpassword
-    #  DB_NAME: mydb
-    #  RQM_SERV: https://www.larouequimarche.ch/wp-admin/admin-ajax.php
+    env_file: "./server/.env"
     depends_on:
       db:
         condition: service_healthy
+    volumes:
+      - logs:/usr/src/app/logs
 
   db:
     image: mysql:5.7
@@ -41,3 +37,4 @@ services:
 
 volumes:
   db-data:
+  logs:

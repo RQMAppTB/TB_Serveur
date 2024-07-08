@@ -1,23 +1,27 @@
+const controller = require("../controllers/admin.controller.js");
+var router = require("express").Router();
+
+router.use(controller.header_check);
+
+router.get("/get-all-data", controller.get_all_data);
+router.get("/get-data/:dosNum", controller.get_data);
+router.get("/get-dist/:dosNum", controller.get_dist);
+router.get("/get-time/:dosNum", controller.get_time);
+router.get("/get-total-dist", controller.get_total_dist);
+router.get("/get-total-time", controller.get_total_time);
+router.get("/logs", controller.logs);
+router.post("/create-participant", controller.create_participant);
+router.post("/add-participant-data", controller.add_participant_data);
+
+module.exports = router;
+
+/*
 module.exports = app => {
-   const controller = require("../controllers/admin.controller.js");
-   var router = require("express").Router();
-
-   router.use(controller.header_check);
-
-   router.get("/get-all-data", controller.get_all_data);
-   router.get("/get-data/:dosNum", controller.get_data);
-   router.get("/get-dist/:dosNum", controller.get_dist);
-   router.get("/get-time/:dosNum", controller.get_time);
-   router.get("/get-total-dist", controller.get_total_dist);
-   router.get("/get-total-time", controller.get_total_time);
-   router.get("/logs", controller.logs);
-   router.post("/create-participant", controller.create_participant);
-   router.post("/add-participant-data", controller.add_participant_data);
 
 
 
    app.use('/server/data', router);
-}
+}*/
 /*
 app.get('/server/data/get-all-data', (req, res) => {
    res.status(501).send('Not implemented');

@@ -1,17 +1,23 @@
-module.exports = app => {
-    const measures = require("../controllers/mobile.controller.js");
-    var router = require("express").Router();
+const controller = require("../controllers/mobile.controller.js");
+var router = require("express").Router();
 
-    router.get("/ident", measures.ident);
-    router.post("/login", measures.login);
-    router.post("/start", measures.start);
-    router.post("/stop", measures.stop);
-    router.post("/update-dist", measures.updateDist);
-    router.get("/getUserDist", measures.getUserDist);
-    router.get("/getAllDist", measures.getAllDist);
-    
-    app.use('/app/measures', router);
-}
+router.get("/ident", controller.ident);
+router.post("/login", controller.login);
+router.post("/start", controller.start);
+router.post("/stop", controller.stop);
+router.post("/update-dist", controller.updateDist);
+router.get("/getUserDist", controller.getUserDist);
+router.get("/getAllDist", controller.getAllDist);
+
+module.exports = router;
+
+/*
+module.exports = app => {
+
+
+   app.use('/app/measures', router);
+}*/
+
 /*
 app.get('/app/measures/ident', async (req, res) => {
     const dosNum = req.body.dosNumber;

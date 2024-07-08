@@ -17,6 +17,14 @@ module.exports = (sequelize, Sequelize) => {
       timeSpent: {
          type: DataTypes.INTEGER,
          allowNull: false
+      },
+      number: {
+         type: DataTypes.INTEGER,
+         allowNull: false
+      },
+      status: {
+         type: DataTypes.BOOLEAN,
+         allowNull: false
       }
    }, {});
 

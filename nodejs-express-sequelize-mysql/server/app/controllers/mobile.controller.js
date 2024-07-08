@@ -98,6 +98,7 @@ exports.login = async (req, res) => {
 exports.start = (req, res) => {
    const dosNum = parseInt(req.body.dosNumber);
    const name = req.body.name;
+   const number = req.body.number;
 
    console.log('Starting user with dosNumber: ' + dosNum);
 
@@ -117,7 +118,9 @@ exports.start = (req, res) => {
       myUuid: _myUuid,
       dosNumber: dosNum,
       distTraveled: 0,
-      timeSpent: 0
+      timeSpent: 0,
+      number: number,
+      status: true
    }).then(() => {
       console.log('measure created');
 
@@ -179,7 +182,8 @@ exports.stop = async (req, res) => {
             // Update the user_measure table with the new distance and time
             UserMeasure.update({
                distTraveled: distTraveled,
-               timeSpent: timeSpent
+               timeSpent: timeSpent,
+               status: false
             }, {
                where: {
                   myUuid: uuid
@@ -289,7 +293,8 @@ function updateMeasure(_uuid, dist, time, res) {
       timeSpent: time
    }, {
       where: {
-         myUuid: _uuid
+         myUuid: _uuid,
+         status: true
       }
    })
 }

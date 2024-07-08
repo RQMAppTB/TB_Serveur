@@ -2,6 +2,7 @@ const { where } = require("sequelize");
 const db = require("../models");
 const usersmodel = require("./users.controller");
 const uuid = require('uuid');
+var path = require('path');
 
 const UserMeasure = db.user_measure;
 const User = db.users;
@@ -52,6 +53,7 @@ exports.get_all_data = (req, res) => {
 };
 
 exports.get_data = (req, res) => {
+   const dosNumber = req.params.dosNum;
 
    User.findOne({
       attributes: [
@@ -66,7 +68,7 @@ exports.get_data = (req, res) => {
          attributes: []
       }],
       where: {
-         dosNumber: req.params.dosNum
+         dosNumber: dosNumber
       },
    }).then(data => {
       console.log("data" + data);
@@ -104,6 +106,8 @@ exports.get_dist = (req, res) => {
 };
 
 exports.get_time = (req, res) => {
+   const dosNumber = req.params.dosNum;
+
    UserMeasure.sum('timeSpent', { where: { dosNumber: dosNumber } })
       .then((sum) => {
          console.log("sum: " + sum);
@@ -148,6 +152,7 @@ exports.get_total_time = (req, res) => {
 
 exports.logs = (req, res) => {
    five0one(req, res);
+   //res.sendFile(path.resolve(__dirname, './../false'));
 };
 
 exports.create_participant = (req, res) => {
@@ -182,6 +187,7 @@ exports.add_participant_data = (req, res) => {
    const dosNum = parseInt(req.body.dosNumber);
    const dist = req.body.distTraveled;
    const time = req.body.timeSpent;
+   const num = req.body.number;
 
    let _myUuid = uuid.v4();
 
@@ -189,7 +195,9 @@ exports.add_participant_data = (req, res) => {
       myUuid: _myUuid,
       dosNumber: dosNum,
       distTraveled: 0,
-      timeSpent: 0
+      timeSpent: 0,
+      number: num,
+      status: false
    }).then(() => {
       console.log('UserMeasure created');
       UserMeasure.update({
