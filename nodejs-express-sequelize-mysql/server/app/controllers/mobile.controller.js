@@ -13,6 +13,8 @@ exports.five0one = (req, res) => {
 exports.ident = async (req, res) => {
    const dosNum = parseInt(req.query.dosNumber);
 
+   console.log('RQM_SERV: ' + process.env.RQM_SERV);
+
    let url = new URL(process.env.RQM_SERV);
    url.searchParams.append('action', "get_username");
    url.searchParams.append('dossard', dosNum.toString().padStart(4, '0'));

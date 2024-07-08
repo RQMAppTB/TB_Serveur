@@ -15,8 +15,9 @@ exports.header_check = (req, res, next) => {
    user_id = req.headers['authorization']
 
    console.log("user_id: " + user_id);
+   console.log("process.env.ADMIN_KEY: " + process.env.ADMIN_KEY);
 
-   if (user_id !== 123456) {
+   if (user_id === process.env.ADMIN_KEY) {
       console.log("Mobile request");
       next();
    }else{
