@@ -56,6 +56,11 @@ exports.get_all_data = (req, res) => {
 exports.get_data = (req, res) => {
    const dosNumber = req.params.dosNum;
 
+   if(!dosNumber){
+      res.status(400).send('Malformed request');
+      return;
+   }
+
    User.findOne({
       attributes: [
          'dosNumber',
@@ -88,6 +93,11 @@ exports.get_data = (req, res) => {
 
 exports.get_dist = (req, res) => {
    const dosNumber = req.params.dosNum;
+
+   if (!dosNumber) {
+      res.status(400).send('Malformed request');
+      return;
+   }
    
    UserMeasure.sum('distTraveled', { where: { dosNumber: dosNumber } })
       .then((sum) => {
@@ -108,6 +118,11 @@ exports.get_dist = (req, res) => {
 
 exports.get_time = (req, res) => {
    const dosNumber = req.params.dosNum;
+
+   if (!dosNumber) {
+      res.status(400).send('Malformed request');
+      return;
+   }
 
    UserMeasure.sum('timeSpent', { where: { dosNumber: dosNumber } })
       .then((sum) => {
@@ -160,6 +175,11 @@ exports.create_participant = (req, res) => {
    const dosNum = req.body.dosNumber;
    const username = req.body.username;
 
+   if (!dosNum || !username) {
+      res.status(400).send('Malformed request');
+      return;
+   }
+
    User.create({
       dosNumber: dosNum,
       name: username,
@@ -189,6 +209,11 @@ exports.add_participant_data = (req, res) => {
    const dist = req.body.distTraveled;
    const time = req.body.timeSpent;
    const num = req.body.number;
+
+   if (!dosNum || !dist || !time || !num) {
+      res.status(400).send('Malformed request');
+      return;
+   }
 
    let _myUuid = uuid.v4();
 

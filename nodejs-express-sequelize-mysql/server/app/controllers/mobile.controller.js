@@ -13,6 +13,11 @@ exports.five0one = (req, res) => {
 exports.ident = async (req, res) => {
    const dosNum = parseInt(req.query.dosNumber);
 
+   if(!dosNum){
+      res.status(400).send('Malformed request');
+      return;
+   }
+
    console.log('RQM_SERV: ' + process.env.RQM_SERV);
 
    let url = new URL(process.env.RQM_SERV);
@@ -51,6 +56,11 @@ exports.login = async (req, res) => {
 
    console.log('Creating user with dosNumber: ' + dosNum + ' and name: ' + username);
 
+   if (!dosNum || !username){
+      res.status(400).send('Malformed request');
+      return;
+   }
+
    const user = await User.findOne({
       where: {
          dosNumber: dosNum
@@ -84,15 +94,19 @@ exports.login = async (req, res) => {
       });
    } else {
       console.log('My User not found');
-      await User.create({
+      User.create({
          dosNumber: dosNum,
          name: username,
          rights: 0
-      });
-      res.status(200).send({
-         dosNumber: dosNum,
-         username: username,
-         distTraveled: distTraveled,
+      }).then(() => {
+         res.status(201).send({
+            dosNumber: dosNum,
+            username: username,
+            distTraveled: 0,
+         });
+      }).catch((error) => {
+         console.log('Error creating user ' + error);
+         res.status(500).send('Error creating user');
       });
    }
 }
@@ -102,9 +116,9 @@ exports.start = (req, res) => {
    const name = req.body.name;
    const number = req.body.number;
 
-   console.log('Starting user with dosNumber: ' + dosNum);
+   console.log('Starting user with dosNumber: ' + dosNum + ' and name: ' + name + ' and number: ' + number);
 
-   if (!dosNum || !name) {
+   if (!dosNum || !name || !number) {
       res.status(400).send('Malformed request');
       return;
    }
@@ -173,6 +187,11 @@ exports.stop = async (req, res) => {
    const distTraveled = req.body.dist;
    const timeSpent = req.body.time;
 
+   if (!dosNum || !uuid || !distTraveled || !timeSpent) {
+      res.status(400).send('Malformed request');
+      return;
+   }
+
    console.log('Stopping user with dosNumber: ' + dosNum + ' and myUuid: ' + uuid);
 
    // check if user exists
@@ -188,7 +207,10 @@ exports.stop = async (req, res) => {
                status: false
             }, {
                where: {
-                  myUuid: uuid
+                  myUuid: uuid,
+                  /*timeSpent:{
+                     [Op.lt]: timeSpent
+                  }*/
                }
             }).then(() => {
                console.log('measure updated');
@@ -240,6 +262,12 @@ exports.stop = async (req, res) => {
 };
 
 exports.updateDist = async (req, res) => {
+
+   if (!req.body.uuid || !req.body.dist || !req.body.time) {
+      res.status(400).send('Malformed request');
+      return;
+   }
+
    console.log('Updating user with uuid: ' + req.body.uuid + ' and dist: ' + req.body.dist + ' and time: ' + req.body.time);
 
    updateMeasure(req.body.uuid, req.body.dist, req.body.time, res)
@@ -255,23 +283,29 @@ exports.updateDist = async (req, res) => {
       });
 };
 
-
 exports.getUserDist = async (req, res) => {
    const dosNum = parseInt(req.query.dosNumber);
+
+   if (!dosNum) {
+      res.status(400).send('Malformed request');
+      return;
+   }
+
 
    UserMeasure.sum('distTraveled', { where: { dosNumber: dosNum } })
       .then((sum) => {
          console.log("sum: " + sum);
          if (sum === null) {
-            res.status(404).send('User not found');
+            res.status(404).send('No measure found for this user');
+         }else{
+            res.status(200).send({
+               dosNumber: dosNum,
+               distTraveled: sum
+            });
          }
-         res.status(200).send({
-            dosNumber: dosNum,
-            distTraveled: sum
-         });
-      }).catch(() => {
-         console.log("sum not found");
-         res.status(400).send('Malformed request');
+      }).catch((error) => {
+         console.log('Error getting user dist' + error);
+         res.status(500).send('Something went wrong');
       });
 }
 

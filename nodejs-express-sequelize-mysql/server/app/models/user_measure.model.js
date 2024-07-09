@@ -6,10 +6,6 @@ module.exports = (sequelize, Sequelize) => {
          type: DataTypes.UUID,
          allowNull: true
       },
-      /*dosNumber: {
-         type: DataTypes.INTEGER,
-         allowNull: false
-      },*/
       distTraveled: {
          type: DataTypes.INTEGER,
          allowNull: false
