@@ -3,12 +3,13 @@ const db = require("../models");
 const usersmodel = require("./users.controller");
 const uuid = require('uuid');
 var path = require('path');
+const { jsonStrMessage } = require("../utils");
 
 const UserMeasure = db.user_measure;
 const User = db.users;
 
-function five0one(req, res){
-   res.status(501).send('Not implemented');
+function five0one(req, res) {
+   res.status(501).send(jsonStrMessage('Not implemented'));
 };
 
 exports.header_check = (req, res, next) => {
@@ -20,9 +21,9 @@ exports.header_check = (req, res, next) => {
    if (user_id === process.env.ADMIN_KEY) {
       console.log("Admin request");
       next();
-   }else{
+   } else {
       console.log("Unauthorized");
-      res.status(401).send('Missing or invalid authorization header');
+      res.status(401).send(jsonStrMessage('Missing or invalid authorization header'));
    }
 };
 
@@ -48,7 +49,7 @@ exports.get_all_data = (req, res) => {
       res.status(200).send(data);
    }).catch(err => {
       console.log("error" + err);
-      res.status(500).send("Error retrieving data");
+      res.status(500).send(jsonStrMessage('Error retrieving data'));
    });
 
 };
@@ -56,8 +57,8 @@ exports.get_all_data = (req, res) => {
 exports.get_data = (req, res) => {
    const dosNumber = req.params.dosNum;
 
-   if(!dosNumber){
-      res.status(400).send('Malformed request');
+   if (!dosNumber) {
+      res.status(400).send(jsonStrMessage('Malformed request'));
       return;
    }
 
@@ -78,16 +79,16 @@ exports.get_data = (req, res) => {
       },
    }).then(data => {
       console.log("data" + data);
-      if(data.dosNumber === null){
+      if (data.dosNumber === null) {
          console.log("User not found")
-         res.status(404).send("User not found");
-      }else{
+         res.status(404).send(jsonStrMessage('User not found'));
+      } else {
          console.log("User found")
          res.status(200).send(data);
       }
    }).catch(err => {
       console.log("error" + err);
-      res.status(500).send("Something went wrong on our side");
+      res.status(500).send(jsonStrMessage('Something went wrong on our side'));
    });
 }
 
@@ -95,15 +96,15 @@ exports.get_dist = (req, res) => {
    const dosNumber = parseInt(req.params.dosNum);
 
    if (isNaN(dosNumber)) {
-      res.status(400).send('Malformed request');
+      res.status(400).send(jsonStrMessage('Malformed request'));
       return;
    }
-   
+
    UserMeasure.sum('distTraveled', { where: { dosNumber: dosNumber } })
       .then((sum) => {
          console.log("sum: " + sum);
          if (sum === null) {
-            res.status(404).send('No measure found');
+            res.status(404).send(jsonStrMessage('No measure found'));
             return;
          }
          res.status(200).send({
@@ -112,9 +113,9 @@ exports.get_dist = (req, res) => {
          });
       }).catch((error) => {
          console.log("Can't get measure: " + error);
-         res.status(500).send('Something went wrong on our side');
+         res.status(500).send(jsonStrMessage('Something went wrong on our side'));
       });
-   
+
 };
 
 exports.get_time = (req, res) => {
@@ -129,7 +130,7 @@ exports.get_time = (req, res) => {
       .then((sum) => {
          console.log("sum: " + sum);
          if (sum === null) {
-            res.status(404).send('No measure found');
+            res.status(404).send(jsonStrMessage('No measure found'));
             return;
          }
          res.status(200).send({
@@ -138,7 +139,7 @@ exports.get_time = (req, res) => {
          });
       }).catch((error) => {
          console.log("Can't get measure: " + error);
-         res.status(500).send('Something went wrong on our side');
+         res.status(500).send(jsonStrMessage('Something went wrong on our side'));
       });
 };
 
@@ -151,7 +152,7 @@ exports.get_total_dist = (req, res) => {
          });
       }).catch((error) => {
          console.log("Can't get measure: " + error);
-         res.status(500).send('Something went wrong on our side');
+         res.status(500).send(jsonStrMessage('Something went wrong on our side'));
       });
 };
 
@@ -164,7 +165,7 @@ exports.get_total_time = (req, res) => {
          });
       }).catch((error) => {
          console.log("Can't get measure: " + error);
-         res.status(500).send('Something went wrong on our side');
+         res.status(500).send(jsonStrMessage('Something went wrong on our side'));
       });
 };
 
@@ -178,7 +179,7 @@ exports.create_participant = (req, res) => {
    const username = req.body.username;
 
    if (isNaN(dosNum) || !username) {
-      res.status(400).send('Malformed request');
+      res.status(400).send(jsonStrMessage('Malformed request'));
       return;
    }
 
@@ -195,13 +196,9 @@ exports.create_participant = (req, res) => {
    }).catch((error) => {
       console.log('Error creating user ' + error);
       if (error.name === 'SequelizeUniqueConstraintError') {
-         res.status(409).send({
-            message: 'User already exists'
-         });
-      }else{
-         res.status(500).send({
-            message: 'Something went wrong on our side'
-         });
+         res.status(409).send(jsonStrMessage('User already exists'));
+      } else {
+         res.status(500).send(jsonStrMessage('Something went wrong on our side'));
       }
    });
 };
@@ -212,8 +209,8 @@ exports.add_participant_data = (req, res) => {
    const time = parseInt(req.body.timeSpent);
    const num = parseInt(req.body.number);
 
-   if (isNaN(dosNum) || isNaN(dist) || isNaN(time) || isNaN(num) || num <= 0){
-      res.status(400).send('Malformed request');
+   if (isNaN(dosNum) || isNaN(dist) || isNaN(time) || isNaN(num) || num <= 0) {
+      res.status(400).send(jsonStrMessage('Malformed request'));
       return;
    }
 
@@ -237,17 +234,17 @@ exports.add_participant_data = (req, res) => {
          }
       }).then(() => {
          console.log('UserMeasure updated');
-         res.status(201).send("Measure created");
+         res.status(201).send(jsonStrMessage('Measure created'));
       }).catch((error) => {
          console.log('Error updating UserMeasure : ' + error);
-         res.status(500).send('Something went wrong on our side');
+         res.status(500).send(jsonStrMessage('Something went wrong on our side'));
       });
    }).catch((error) => {
       console.log('Error creating UserMeasure : ' + error);
       if (error.name === 'SequelizeForeignKeyConstraintError') {
-         res.status(404).send('User not found');
-      }else{
-         res.status(500).send('Something went wrong on our side');
+         res.status(404).send(jsonStrMessage('User not found'));
+      } else {
+         res.status(500).send(jsonStrMessage('Something went wrong on our side'));
       }
    });
 
