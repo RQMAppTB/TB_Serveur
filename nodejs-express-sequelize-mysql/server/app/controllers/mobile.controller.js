@@ -107,7 +107,7 @@ exports.login = async (req, res) => {
          });
       }).catch((error) => {
          console.log('Error creating user ' + error);
-         res.status(500).send(jsonStrMessage('Error creating user'));
+         res.status(500).send(jsonStrMessage('Something went wrong on our side'));
       });
    }
 }
@@ -252,7 +252,7 @@ exports.stop = async (req, res) => {
             } else {
                console.log("Notification not sent");
                console.log(jresult.error)
-               res.status(202).send(jsonStrMessage('Could not send notification'));
+               res.status(202).send(jsonStrMessage('Measure stopped but could not send notification'));
             }
          })
          .catch((error) => {
