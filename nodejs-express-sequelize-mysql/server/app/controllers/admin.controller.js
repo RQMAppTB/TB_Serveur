@@ -18,7 +18,7 @@ exports.header_check = (req, res, next) => {
    console.log("process.env.ADMIN_KEY: " + process.env.ADMIN_KEY);
 
    if (user_id === process.env.ADMIN_KEY) {
-      console.log("Mobile request");
+      console.log("Admin request");
       next();
    }else{
       console.log("Unauthorized");
@@ -87,14 +87,14 @@ exports.get_data = (req, res) => {
       }
    }).catch(err => {
       console.log("error" + err);
-      res.status(500).send("Error retrieving data");
+      res.status(500).send("Something went wrong on our side");
    });
 }
 
 exports.get_dist = (req, res) => {
-   const dosNumber = req.params.dosNum;
+   const dosNumber = parseInt(req.params.dosNum);
 
-   if (!dosNumber) {
+   if (isNaN(dosNumber)) {
       res.status(400).send('Malformed request');
       return;
    }
@@ -103,23 +103,24 @@ exports.get_dist = (req, res) => {
       .then((sum) => {
          console.log("sum: " + sum);
          if (sum === null) {
-            res.status(404).send('User not found');
+            res.status(404).send('No measure found');
+            return;
          }
          res.status(200).send({
             dosNumber: dosNumber,
             distTraveled: sum
          });
-      }).catch(() => {
-         console.log("sum not found");
-         res.status(400).send('Malformed request');
+      }).catch((error) => {
+         console.log("Can't get measure: " + error);
+         res.status(500).send('Something went wrong on our side');
       });
    
 };
 
 exports.get_time = (req, res) => {
-   const dosNumber = req.params.dosNum;
+   const dosNumber = parseInt(req.params.dosNum);
 
-   if (!dosNumber) {
+   if (isNaN(dosNumber)) {
       res.status(400).send('Malformed request');
       return;
    }
@@ -128,15 +129,16 @@ exports.get_time = (req, res) => {
       .then((sum) => {
          console.log("sum: " + sum);
          if (sum === null) {
-            res.status(404).send('User not found');
+            res.status(404).send('No measure found');
+            return;
          }
          res.status(200).send({
             dosNumber: dosNumber,
             timeSpent: sum
          });
-      }).catch(() => {
-         console.log("sum not found");
-         res.status(400).send('Malformed request');
+      }).catch((error) => {
+         console.log("Can't get measure: " + error);
+         res.status(500).send('Something went wrong on our side');
       });
 };
 
@@ -147,9 +149,9 @@ exports.get_total_dist = (req, res) => {
          res.status(200).send({
             distTraveled: sum
          });
-      }).catch(() => {
-         console.log("sum not found");
-         res.status(400).send('Malformed request');
+      }).catch((error) => {
+         console.log("Can't get measure: " + error);
+         res.status(500).send('Something went wrong on our side');
       });
 };
 
@@ -160,9 +162,9 @@ exports.get_total_time = (req, res) => {
          res.status(200).send({
             timeSpent: sum
          });
-      }).catch(() => {
-         console.log("sum not found");
-         res.status(400).send('Malformed request');
+      }).catch((error) => {
+         console.log("Can't get measure: " + error);
+         res.status(500).send('Something went wrong on our side');
       });
 };
 
@@ -172,10 +174,10 @@ exports.logs = (req, res) => {
 };
 
 exports.create_participant = (req, res) => {
-   const dosNum = req.body.dosNumber;
+   const dosNum = parseInt(req.body.dosNumber);
    const username = req.body.username;
 
-   if (!dosNum || !username) {
+   if (isNaN(dosNum) || !username) {
       res.status(400).send('Malformed request');
       return;
    }
@@ -186,7 +188,7 @@ exports.create_participant = (req, res) => {
       rights: 0
    }).then(() => {
       console.log('User created');
-      res.status(200).send({
+      res.status(201).send({
          dosNumber: dosNum,
          username: username
       });
@@ -198,7 +200,7 @@ exports.create_participant = (req, res) => {
          });
       }else{
          res.status(500).send({
-            message: 'Error creating user'
+            message: 'Something went wrong on our side'
          });
       }
    });
@@ -206,11 +208,11 @@ exports.create_participant = (req, res) => {
 
 exports.add_participant_data = (req, res) => {
    const dosNum = parseInt(req.body.dosNumber);
-   const dist = req.body.distTraveled;
-   const time = req.body.timeSpent;
-   const num = req.body.number;
+   const dist = parseInt(req.body.distTraveled);
+   const time = parseInt(req.body.timeSpent);
+   const num = parseInt(req.body.number);
 
-   if (!dosNum || !dist || !time || !num) {
+   if (isNaN(dosNum) || isNaN(dist) || isNaN(time) || isNaN(num) || num <= 0){
       res.status(400).send('Malformed request');
       return;
    }
@@ -235,17 +237,17 @@ exports.add_participant_data = (req, res) => {
          }
       }).then(() => {
          console.log('UserMeasure updated');
-         res.status(200).send("Measure created");
-      }).catch(() => {
-         console.log('Error updating UserMeasure');
-         res.status(500).send('Error updating UserMeasure');
+         res.status(201).send("Measure created");
+      }).catch((error) => {
+         console.log('Error updating UserMeasure : ' + error);
+         res.status(500).send('Something went wrong on our side');
       });
    }).catch((error) => {
       console.log('Error creating UserMeasure : ' + error);
       if (error.name === 'SequelizeForeignKeyConstraintError') {
          res.status(404).send('User not found');
       }else{
-         res.status(500).send('Error creating UserMeasure');
+         res.status(500).send('Something went wrong on our side');
       }
    });
 

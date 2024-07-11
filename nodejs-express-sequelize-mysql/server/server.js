@@ -1,5 +1,7 @@
 const express = require("express");
 const db = require("./app/models");
+const mobile_router = require("./app/routes/mobile.routes");
+const admin_router = require("./app/routes/admin.routes");
 
 const app = express();
 
@@ -22,8 +24,6 @@ app.get("/", (req, res) => {
 });
 
 //require("./app/routes/mobile.routes")(app);
-const mobile_router = require("./app/routes/mobile.routes");
-const admin_router = require("./app/routes/admin.routes");
 
 app.use('/app/measures', mobile_router);
 app.use('/server/data', admin_router);

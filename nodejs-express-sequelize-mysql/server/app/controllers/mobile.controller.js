@@ -2,19 +2,20 @@
 const db = require("../models");
 const usersmodel = require("./users.controller");
 const uuid = require('uuid');
-const { DataTypes, where } = require("sequelize");
+const { DataTypes, where, Op } = require("sequelize");
+const { jsonStrMessage } = require("../utils");
 const UserMeasure = db.user_measure;
 const User = db.users;
 
 exports.five0one = (req, res) => {
-   res.status(501).send('Not implemented');
+   res.status(501).send(jsonStrMessage('Not implemented'));
 };
 
 exports.ident = async (req, res) => {
    const dosNum = parseInt(req.query.dosNumber);
 
-   if(!dosNum){
-      res.status(400).send('Malformed request');
+   if(isNaN(dosNum)){
+      res.status(400).send(jsonStrMessage('Malformed request'));
       return;
    }
 
@@ -41,13 +42,13 @@ exports.ident = async (req, res) => {
          if (jresult.success) {
             res.status(200).send({
                dosNumber: dosNum,
-               name: jresult.username || "User not found",
+               name: jresult.username,
             });
          } else {
-            res.status(404).send('User not found');
+            res.status(404).send(jsonStrMessage('User not found'));
          }
       })
-      .catch((error) => res.status(500).send("Something went wrong on our side"));
+      .catch((error) => res.status(500).send(jsonStrMessage("Something went wrong on our side")));
 };
 
 exports.login = async (req, res) => {
@@ -56,8 +57,8 @@ exports.login = async (req, res) => {
 
    console.log('Creating user with dosNumber: ' + dosNum + ' and name: ' + username);
 
-   if (!dosNum || !username){
-      res.status(400).send('Malformed request');
+   if (isNaN(dosNum) || !username){
+      res.status(400).send(jsonStrMessage('Malformed request'));
       return;
    }
 
@@ -106,7 +107,7 @@ exports.login = async (req, res) => {
          });
       }).catch((error) => {
          console.log('Error creating user ' + error);
-         res.status(500).send('Error creating user');
+         res.status(500).send(jsonStrMessage('Error creating user'));
       });
    }
 }
@@ -114,12 +115,12 @@ exports.login = async (req, res) => {
 exports.start = (req, res) => {
    const dosNum = parseInt(req.body.dosNumber);
    const name = req.body.name;
-   const number = req.body.number;
+   const number = parseInt(req.body.number);
 
    console.log('Starting user with dosNumber: ' + dosNum + ' and name: ' + name + ' and number: ' + number);
 
-   if (!dosNum || !name || !number) {
-      res.status(400).send('Malformed request');
+   if (isNaN(dosNum) || !name || isNaN(number)) {
+      res.status(400).send(jsonStrMessage('Malformed request'));
       return;
    }
 
@@ -161,125 +162,136 @@ exports.start = (req, res) => {
 
             if (jresult.success) {
                console.log("Notification sent");
-               res.status(200).send({
+               res.status(201).send({
                   dosNumber: dosNum,
                   myUuid: _myUuid
                });
             } else {
                console.log("Notification not sent");
-               res.status(400).send(jresult.error);
+               res.status(202).send({
+                  dosNumber: dosNum,
+                  myUuid: _myUuid,
+                  error: "Notification not sent"
+               });
             }
          })
          .catch((error) => {
             console.error(error)
-            res.status(500).send("Something went wrong on our side");
+            res.status(500).send(jsonStrMessage("Something went wrong on our side"));
          });
    }).catch((error) => {
       console.log('Error creating measure');
       console.log("error" + error);
-      res.status(404).send('User not found');
+      if(error.name === 'SequelizeForeignKeyConstraintError'){
+         res.status(404).send(jsonStrMessage('User does not exist'));
+      }
+      res.status(500).send(jsonStrMessage('Something went wrong on our side'));
    });
 }
 
 exports.stop = async (req, res) => {
-   const dosNum = parseInt(req.body.dosNumber);
    const uuid = req.body.uuid;
-   const distTraveled = req.body.dist;
-   const timeSpent = req.body.time;
+   const distTraveled = parseInt(req.body.dist);
+   const timeSpent = parseInt(req.body.time);
 
-   if (!dosNum || !uuid || !distTraveled || !timeSpent) {
-      res.status(400).send('Malformed request');
+   if (!uuid || isNaN(distTraveled) || isNaN(timeSpent)) {
+      res.status(400).send(jsonStrMessage('Malformed request'));
       return;
    }
 
-   console.log('Stopping user with dosNumber: ' + dosNum + ' and myUuid: ' + uuid);
+   console.log('Stopping user with uuid: ' + uuid + ' and dist: ' + distTraveled + ' and time: ' + timeSpent)
 
-   // check if user exists
-   usersmodel.getUser(dosNum)
-      .then((user) => {
-         if (user) {
-            console.log("User found" + user);
-
-            // Update the user_measure table with the new distance and time
-            UserMeasure.update({
-               distTraveled: distTraveled,
-               timeSpent: timeSpent,
-               status: false
-            }, {
-               where: {
-                  myUuid: uuid,
-                  /*timeSpent:{
-                     [Op.lt]: timeSpent
-                  }*/
-               }
-            }).then(() => {
-               console.log('measure updated');
-
-               const requestOptions = {
-                  method: "GET",
-                  redirect: "follow"
-               };
-
-               let url = new URL(process.env.RQM_SERV);
-               url.searchParams.append('action', "save_notification");
-               url.searchParams.append('utilisateur', user.name);
-               url.searchParams.append('dossard', user.dosNumber.toString().padStart(4, '0'));
-               url.searchParams.append('type', "end");
-
-               fetch(url, requestOptions)
-                  .then((response) => response.text())
-                  .then((result) => {
-                     console.log(result);
-
-                     jresult = JSON.parse(result);
-
-                     if (jresult.success) {
-                        console.log("Notification sent");
-                        res.status(200).send('Measure stopped');
-                     } else {
-                        console.log("Notification not sent");
-                        res.status(400).send(jresult.error);
-                     }
-                  })
-                  .catch((error) => {
-                     console.error(error)
-                     res.status(500).send("Something went wrong on our side");
-                  });
-            }).catch(() => {
-               console.log('Error updating measure');
-               res.status(500).send('Error updating measure');
-            });
-
-
-         } else {
-            console.log("User not found");
-            res.status(404).send('User not found');
+   UserMeasure.update({
+      distTraveled: distTraveled,
+      timeSpent: timeSpent,
+      status: false
+   }, {
+      where: {
+         myUuid: uuid,
+         status: true,
+         timeSpent:{
+            [Op.lte]: timeSpent
+         },
+         distTraveled:{
+            [Op.lte]: distTraveled
          }
-      }).catch(() => {
-         res.status(500).send('Something went wrong');
-      });
+      }
+   }).then(async (nbUpdate) => {
 
+      if(nbUpdate[0] === 0){
+         res.status(404).send(jsonStrMessage('No running measure was found for this uuid'));
+         return;
+      }
+
+      console.log('measure updated');
+
+      const measure = await UserMeasure.findByPk(uuid);
+      const user = await User.findByPk(measure.dosNumber);
+
+      const requestOptions = {
+         method: "GET",
+         redirect: "follow"
+      };
+
+      let url = new URL(process.env.RQM_SERV);
+      url.searchParams.append('action', "save_notification");
+      url.searchParams.append('utilisateur', user.name);
+      url.searchParams.append('dossard', user.dosNumber.toString().padStart(4, '0'));
+      url.searchParams.append('type', "end");
+
+      fetch(url, requestOptions)
+         .then((response) => response.text())
+         .then((result) => {
+            console.log(result);
+
+            jresult = JSON.parse(result);
+
+            if (jresult.success) {
+               console.log("Notification sent");
+               res.status(201).send(jsonStrMessage('Measure stopped'));
+            } else {
+               console.log("Notification not sent");
+               console.log(jresult.error)
+               res.status(202).send(jsonStrMessage('Could not send notification'));
+            }
+         })
+         .catch((error) => {
+            console.log("Error sending notification");
+            console.error(error)
+            res.status(500).send(jsonStrMessage("Something went wrong on our side"));
+         });
+   }).catch((error) => {
+      console.log('Error updating measure');
+      console.log("error" + error);
+      res.status(500).send(jsonStrMessage('Something went wrong on our side'));
+   });
 };
 
 exports.updateDist = async (req, res) => {
 
+   const _uuid = req.body.uuid;
+   const dist = parseInt(req.body.dist);
+   const time = parseInt(req.body.time);
+
    if (!req.body.uuid || !req.body.dist || !req.body.time) {
-      res.status(400).send('Malformed request');
+      res.status(400).send(jsonStrMessage('Malformed request'));
       return;
    }
 
    console.log('Updating user with uuid: ' + req.body.uuid + ' and dist: ' + req.body.dist + ' and time: ' + req.body.time);
 
-   updateMeasure(req.body.uuid, req.body.dist, req.body.time, res)
+   console.log('testing value:' + _uuid + ' /// ' + dist + ' /// ' + time);
+
+   updateMeasure(req.body.uuid, parseInt(req.body.dist), parseInt(req.body.time))
       .then((array) => {
          if (array[0] === 0) {
-            res.status(404).send('User not found');
+            res.status(404).send(jsonStrMessage('User not found'));
          } else {
-            res.status(200).send('Measure updated');
+            res.status(200).send(jsonStrMessage('Measure updated'));
          }
-         //res.status(200).send('Measure updated');
-      }).catch(() => {
-         res.status(500).send('Error updating measure');
+      }).catch((error) => {
+         console.log('Error updating measure ' + error);
+         res.status(500).send(jsonStrMessage('Something went wrong on our side'));
       });
 };
 
@@ -287,7 +299,7 @@ exports.getUserDist = async (req, res) => {
    const dosNum = parseInt(req.query.dosNumber);
 
    if (!dosNum) {
-      res.status(400).send('Malformed request');
+      res.status(400).send(jsonStrMessage('Malformed request'));
       return;
    }
 
@@ -296,7 +308,7 @@ exports.getUserDist = async (req, res) => {
       .then((sum) => {
          console.log("sum: " + sum);
          if (sum === null) {
-            res.status(404).send('No measure found for this user');
+            res.status(404).send(jsonStrMessage('No measure found for this user'));
          }else{
             res.status(200).send({
                dosNumber: dosNum,
@@ -305,7 +317,7 @@ exports.getUserDist = async (req, res) => {
          }
       }).catch((error) => {
          console.log('Error getting user dist' + error);
-         res.status(500).send('Something went wrong');
+         res.status(500).send(jsonStrMessage('Something went wrong on our side'));
       });
 }
 
@@ -314,23 +326,30 @@ exports.getAllDist = async (req, res) => {
       .then((sum) => {
          console.log("sum: " + sum);
          res.status(200).send({
-            distTraveled: sum
+            distTraveled: sum || 0
          });
       }).catch(() => {
          console.log("sum not found");
-         res.status(400).send('Malformed request');
+         res.status(500).send(jsonStrMessage('Something went wrong on our side'));
       });
 }
 
 
-function updateMeasure(_uuid, dist, time, res) {
+function updateMeasure(_uuid, dist, time) {
+
    return UserMeasure.update({
       distTraveled: dist,
       timeSpent: time
    }, {
       where: {
          myUuid: _uuid,
-         status: true
+         status: true,
+         timeSpent:{
+            [Op.lte]: time
+         },
+         distTraveled:{
+            [Op.lte]: dist
+         }
       }
    })
 }
