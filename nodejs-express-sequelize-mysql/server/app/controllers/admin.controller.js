@@ -1,6 +1,5 @@
 const { where } = require("sequelize");
 const db = require("../models");
-const usersmodel = require("./users.controller");
 const uuid = require('uuid');
 var path = require('path');
 const { jsonStrMessage } = require("../utils");
@@ -144,16 +143,22 @@ exports.get_time = (req, res) => {
 };
 
 exports.get_total_dist = (req, res) => {
-   UserMeasure.sum('distTraveled')
-      .then((sum) => {
-         console.log("sum: " + sum);
-         res.status(200).send({
-            distTraveled: sum
-         });
-      }).catch((error) => {
-         console.log("Can't get measure: " + error);
-         res.status(500).send(jsonStrMessage('Something went wrong on our side'));
+   UserMeasure.findAll({
+      attributes: [
+         [db.sequelize.fn('SUM', db.sequelize.literal('distTraveled * number')), 'distTraveled']
+      ],
+      raw: true
+   })
+   .then((sum) => {
+      const total = parseInt(sum[0].distTraveled, 10);
+      console.log("sum: " + total);
+      res.status(200).send({
+         distTraveled: total || 0
       });
+   }).catch((error) => {
+      console.log("Can't get measure: " + error);
+      res.status(500).send(jsonStrMessage('Something went wrong on our side'));
+   });
 };
 
 exports.get_total_time = (req, res) => {
@@ -172,6 +177,22 @@ exports.get_total_time = (req, res) => {
 exports.logs = (req, res) => {
    five0one(req, res);
    //res.sendFile(path.resolve(__dirname, './../false'));
+};
+
+exports.get_active_number = (req, res) => {
+   UserMeasure.sum('number', {
+      where: {
+         status: true
+      }
+   }).then((sum) => {
+      console.log("sum: " + sum);
+      res.status(200).send({
+         number: sum || 0
+      });
+   }).catch((error) => {
+      console.log("Can't get measure: " + error);
+      res.status(500).send(jsonStrMessage('Something went wrong on our side'));
+   });
 };
 
 exports.create_participant = (req, res) => {

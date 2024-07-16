@@ -1,6 +1,4 @@
-//const { Json } = require("sequelize/lib/utils");
 const db = require("../models");
-const usersmodel = require("./users.controller");
 const uuid = require('uuid');
 const { DataTypes, where, Op } = require("sequelize");
 const { jsonStrMessage } = require("../utils");
@@ -91,7 +89,7 @@ exports.login = async (req, res) => {
       res.status(200).send({
          dosNumber: user.dosNumber,
          username: user.name,
-         distTraveled: distTraveled,
+         distTraveled: distTraveled || 0,
       });
    } else {
       console.log('My User not found');
@@ -322,16 +320,22 @@ exports.getUserDist = async (req, res) => {
 }
 
 exports.getAllDist = async (req, res) => {
-   UserMeasure.sum('distTraveled')
-      .then((sum) => {
-         console.log("sum: " + sum);
-         res.status(200).send({
-            distTraveled: sum || 0
-         });
-      }).catch(() => {
-         console.log("sum not found");
-         res.status(500).send(jsonStrMessage('Something went wrong on our side'));
+   UserMeasure.findAll({
+      attributes: [
+         [db.sequelize.fn('SUM', db.sequelize.literal('distTraveled * number')), 'distTraveled']
+      ],
+      raw: true
+   })
+   .then((sum) => {
+      const total = parseInt(sum[0].distTraveled, 10);
+      console.log("sum: " + total);
+      res.status(200).send({
+         distTraveled: total || 0
       });
+   }).catch((error) => {
+      console.log("Can't get measure: " + error);
+      res.status(500).send(jsonStrMessage('Something went wrong on our side'));
+   });
 }
 
 

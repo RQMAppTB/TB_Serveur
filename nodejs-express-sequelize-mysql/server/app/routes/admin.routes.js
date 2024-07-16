@@ -10,6 +10,7 @@ router.get("/get-time/:dosNum", controller.get_time);
 router.get("/get-total-dist", controller.get_total_dist);
 router.get("/get-total-time", controller.get_total_time);
 router.get("/logs", controller.logs);
+router.get("/get-active-number", controller.get_active_number);
 router.post("/create-participant", controller.create_participant);
 router.post("/add-participant-data", controller.add_participant_data);
 
