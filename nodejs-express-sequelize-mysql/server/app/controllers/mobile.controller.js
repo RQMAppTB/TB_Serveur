@@ -75,7 +75,11 @@ exports.login = async (req, res) => {
    const distTraveled = await UserMeasure.sum('distTraveled', { where: { dosNumber: dosNum } })
       .then((sum) => {
          console.log("sum: " + sum);
-         return sum;
+         if(sum === null){
+            return sum;
+         }else{
+            return 0;
+         }
       }).catch(() => {
          console.log("sum not found");
          return 0;
@@ -89,7 +93,7 @@ exports.login = async (req, res) => {
       res.status(200).send({
          dosNumber: user.dosNumber,
          username: user.name,
-         distTraveled: distTraveled || 0,
+         distTraveled: distTraveled,
       });
    } else {
       console.log('My User not found');
