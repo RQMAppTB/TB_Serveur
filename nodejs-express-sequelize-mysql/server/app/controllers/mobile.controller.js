@@ -76,9 +76,9 @@ exports.login = async (req, res) => {
       .then((sum) => {
          console.log("sum: " + sum);
          if(sum === null){
-            return sum;
-         }else{
             return 0;
+         }else{
+            return sum;
          }
       }).catch(() => {
          console.log("sum not found");
