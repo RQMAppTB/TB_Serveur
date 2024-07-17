@@ -79,7 +79,7 @@ La route de base pour tous les endpoints de l'application mobile est `/server/da
 ### Get the total distance travelled during the event
 - **Endpoint:** `/getAllDist`
 - **Method:** `GET`
-- **Description:** Permet d'obtenir la distance totale parcourue par les participant durant l'évènement.
+- **Description:** Permet d'obtenir la distance totale parcourue par les participants durant l'évènement.
 - **Query Parameters**
   - `none`
 - **Responses:**
@@ -102,6 +102,7 @@ La route de base pour tous les endpoints de l'application mobile est `/server/da
 - **Method:** `POST`
 - **Description:** Crée un participant dans la DB du serveur. Si le participant existe déjà, renvoie simplement les informations déjà connues.
 - **Body Parameters:**
+  
   ```json
   {
     "dosNumber": 1234,
@@ -109,7 +110,7 @@ La route de base pour tous les endpoints de l'application mobile est `/server/da
   }
 - **Responses:**
   - **200 Ok**  
-  Renvoyé si l'utilisateur existe déjà
+    Renvoyé si l'utilisateur existe déjà
     ```json
     {
       "dosNumber": 1234,
@@ -236,7 +237,8 @@ La route de base pour tous les endpoints de l'application mobile est `/server/da
 - **Method:** `POST`
 - **Description:** Permet de mettre à jour une mesure en cours avec un nouveau temps et une nouvelle distance.
 - **Body Parameters:**  
-Si plusieurs personnes ont participés à la mesure, la multiplication doit être faite au préalable.
+  La distance fournie ici est la distance faite par une seule personne. La gestion du nombre de personnes par mesures se fait côté serveur.
+  
   ```json
   {
     "uuid": "04610a98-5cef-4201-b7aa-e5d9ac293055",
@@ -276,7 +278,7 @@ Si plusieurs personnes ont participés à la mesure, la multiplication doit êtr
 ### Get all users data
 - **Endpoint:** `/get-all-data`
 - **Method:** `GET`
-- **Description:** Récupère toutes les données et les agrège en fonction de l'utilisateur. Retourne une liste d'utilisateur avec leur numéro de dossard, leur nom, la distance totale qu'ils ont parcourue, le temps total qu'ils ont passé sur le parcours et le nombre de mesures effectuées.
+- **Description:** Récupère toutes les données et les agrège en fonction de l'utilisateur. Retourne une liste d'utilisateur avec leur numéro de dossard, leur nom, la distance totale qu'ils ont parcourue, le temps total qu'ils ont passé sur le parcours et le nombre de mesures effectuées. La distance parcourue et le temps passé ne prennent pas en compte le nombre de personnes ayant effectué la mesure. Autrement dit, ces informations ne montre que des performances individuelles.
 - **Headers:**
   - `Authorization: user_id`
 - **Query Parameters:**
@@ -321,12 +323,13 @@ Si plusieurs personnes ont participés à la mesure, la multiplication doit êtr
 ### Get data for a specific user
 - **Endpoint:** `/get-data/:dosNum`
 - **Method:** `GET`
-- **Description:** Récupères les informations d'un utilisateur en fonction du numéro de dossard passé. Les données récupérées sont le numéro de dossard, le nom, la distance totale qu'il a parcourue, le temps total qu'il a passé sur le parcours et le nombre de mesures effectuées.
+- **Description:** Récupères les informations d'un utilisateur en fonction du numéro de dossard passé. Les données récupérées sont le numéro de dossard, le nom, la distance totale qu'il a parcourue, le temps total qu'il a passé sur le parcours et le nombre de mesures effectuées. La distance parcourue et le temps passé ne prennent pas en compte le nombre de personnes ayant effectué la mesure. Autrement dit, ces informations ne montre que des performances individuelles.
 - **Headers:**
   - `Authorization: user_id`
 - **Query Parameters:**
   - `dosNum` - Numéro de dossard
 - **Responses:**
+  
   - **200 OK**
     ```json
     {
@@ -366,7 +369,7 @@ Si plusieurs personnes ont participés à la mesure, la multiplication doit êtr
 ### Get distance for a specific user
 - **Endpoint:** `/get-dist/:dosNum`
 - **Method:** `GET`
-- **Description:** Permet de récupérer la distance parcourue par un utilisateur, identifié par son numéro de dossard.
+- **Description:** Permet de récupérer la distance parcourue par un utilisateur, identifié par son numéro de dossard. La distance parcourue ne prend pas en compte le nombre de personnes ayant effectué la mesure. Autrement dit, ces informations ne montre que des performances individuelles.
 - **Headers:**
   - `Authorization: user_id`
 - **Query Parameters:**
@@ -408,7 +411,7 @@ Si plusieurs personnes ont participés à la mesure, la multiplication doit êtr
 ### Get time spent by a specific user
 - **Endpoint:** `/get-time/:dosNum`
 - **Method:** `GET`
-- **Description:** Permet de récupérer le temps passé par un utilisateur, identifié par son numéro de dossard.
+- **Description:** Permet de récupérer le temps passé par un utilisateur, identifié par son numéro de dossard. Le temps passé ne prend pas en compte le nombre de personnes ayant effectué la mesure. Autrement dit, ces informations ne montre que des performances individuelles.
 - **Headers:**
   - `Authorization: user_id`
 - **Query Parameters:**
@@ -444,7 +447,7 @@ Si plusieurs personnes ont participés à la mesure, la multiplication doit êtr
 ### Get total distance traveled
 - **Endpoint:** `/get-total-dist`
 - **Method:** `GET`
-- **Description:** Permet de récupérer la distance totale parcourue par les participants durant l'évènement
+- **Description:** Permet de récupérer la distance totale parcourue par les participants durant l'évènement. Prend en compte le nombre de personne ayant fait chaque mesure. 
 - **Headers:**
   - `Authorization: user_id`
 - **Query Parameters:**
@@ -473,7 +476,7 @@ Si plusieurs personnes ont participés à la mesure, la multiplication doit êtr
 ### Get total time spent 
 - **Endpoint:** `/get-total-time`
 - **Method:** `GET`
-- **Description:** Permet de récupérer le temps total passé sur le parcours par les participants.
+- **Description:** Permet de récupérer le temps total passé sur le parcours par les participants. Prend en compte le nombre de personne ayant fait chaque mesure. 
 - **Headers:**
   - `Authorization: user_id`
 - **Query Parameters:**
@@ -500,7 +503,34 @@ Si plusieurs personnes ont participés à la mesure, la multiplication doit êtr
 
 <div style="page-break-after: always;"></div>
 
+### Get number of active participant
+
+- **Endpoint:** `/get-active-number`
+- **Method:** `GET`
+- **Description:** Permet d'obtenir le nombre de participant actuellement en train de se mesurer sur le parcours.
+- **Headers:**
+  - `Authorization: user_id`
+- **Query Parameters:**
+  - `none`
+- **Responses:**
+  - **200 OK**
+    ```json
+    {
+      "number": 50
+    }
+    ```
+  - **500 Internal Server Error**
+    
+    ```json
+    {
+      "message": "Something went wrong on our side"
+    }
+    ```
+
+<div style="page-break-after: always;"></div>
+
 ### Get Logs
+
 - **Endpoint:** `/logs`
 - **Method:** `GET`
 - **Description:** Permet de récupérer certains logs de l'évènement. Les logs récupérés sont ceux indiquant le début d'une mesure et l'arrêt d'une mesure, ainsi que la raison de cet arrêt.

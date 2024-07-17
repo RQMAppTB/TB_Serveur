@@ -5,7 +5,7 @@ router.get("/ident", controller.ident);
 router.post("/login", controller.login);
 router.post("/start", controller.start);
 router.post("/stop", controller.stop);
-router.post("/update-dist", controller.updateDist);
+router.post("/updateDist", controller.updateDist);
 router.get("/getUserDist", controller.getUserDist);
 router.get("/getAllDist", controller.getAllDist);
 
