@@ -267,6 +267,5 @@ exports.add_participant_data = (req, res) => {
       }
    });
 
-   
 };
 
