@@ -1,0 +1,17 @@
+{
+  "name": "tb_server_rqm",
+  "version": "1.0.0",
+  "description": "Serveur API pour le TB pour l'association de La Roue Qui Marche",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Thibault Seem",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.18.2",
+    "mysql2": "^3.10.2",
+    "sequelize": "^6.32.0",
+    "uuid": "^10.0.0"
+  }
+}
