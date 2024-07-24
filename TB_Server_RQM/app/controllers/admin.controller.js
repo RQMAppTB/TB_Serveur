@@ -266,6 +266,4 @@ exports.add_participant_data = (req, res) => {
          res.status(500).send(jsonStrMessage('Something went wrong on our side'));
       }
    });
-
 };
-
