@@ -12,19 +12,19 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 
-db.sequelize.sync()//{ force: true})
+db.sequelize.sync()
    .then(() => {
       console.log("Synced db.");
    }).catch((err) => {
       console.log("Failed to sync db: " + err.message);
    });
 
+// Simple route to check if the server is live
 app.get("/", (req, res) => {
    res.json({ message: "server is live" });
 });
 
-//require("./app/routes/mobile.routes")(app);
-
+// Add the routes to the app
 app.use('/app/measures', mobile_router);
 app.use('/server/data', admin_router);
 

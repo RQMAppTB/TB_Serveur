@@ -5,10 +5,25 @@ const { jsonStrMessage } = require("../utils");
 const UserMeasure = db.user_measure;
 const User = db.users;
 
+/**
+ * Function to return a 501 error code to a request
+ * @param {*} req request object 
+ * @param {*} res response object
+ */
 exports.five0one = (req, res) => {
    res.status(501).send(jsonStrMessage('Not implemented'));
 };
 
+/**
+ * Function to get the user name from the dossard number
+ * It will call the RQM server to get the user name
+ * It will return a 200 status code with the user name if the user is found
+ * It will return a 400 status code if the request is malformed
+ * It will return a 404 status code if the user is not found
+ * It will return a 500 status code if an error occurs
+ * @param {*} req request object
+ * @param {*} res response object
+ */
 exports.ident = async (req, res) => {
    const dosNum = parseInt(req.query.dosNumber);
 
@@ -49,6 +64,15 @@ exports.ident = async (req, res) => {
       .catch((error) => res.status(500).send(jsonStrMessage("Something went wrong on our side")));
 };
 
+/**
+ * Function to create a user if it does not exist
+ * It will return a 200 status code with the user information if the user already exists
+ * It will return a 201 status code with the user information if the user is created
+ * It will return a 400 status code if the request is malformed
+ * It will return a 500 status code if an error occurs
+ * @param {*} req request object
+ * @param {*} res response object
+ */
 exports.login = async (req, res) => {
    const dosNum = parseInt(req.body.dosNumber);
    const username = req.body.username;
@@ -113,6 +137,16 @@ exports.login = async (req, res) => {
    }
 }
 
+/**
+ * Function to start a measure for a user
+ * It will return a 201 status code with the user information if the measure is started
+ * It will return a 202 status code with the user information if the notification could not be sent to the RQM server
+ * It will return a 400 status code if the request is malformed
+ * It will return a 404 status code if the user does not exist
+ * It will return a 500 status code if an error occurs
+ * @param {*} req request object
+ * @param {*} res response object
+ */
 exports.start = (req, res) => {
    const dosNum = parseInt(req.body.dosNumber);
    const name = req.body.name;
@@ -127,10 +161,6 @@ exports.start = (req, res) => {
 
    // Generate a new UUID
    let _myUuid = uuid.v4();
-
-   // TODO remove this line later
-   //_myUuid = "04610a98-5cef-4201-b7aa-e5d9ac293055";
-
 
    UserMeasure.create({
       myUuid: _myUuid,
@@ -190,6 +220,16 @@ exports.start = (req, res) => {
    });
 }
 
+/**
+ * Function to stop a measure
+ * It will return a 201 status code if the measure is stopped and the notification is sent
+ * It will return a 202 status code if the measure is stopped but the notification could not be sent
+ * It will return a 400 status code if the request is malformed
+ * It will return a 404 status code if the measure is not found
+ * It will return a 500 status code if an error occurs
+ * @param {*} req request object
+ * @param {*} res response object
+ */
 exports.stop = async (req, res) => {
    const uuid = req.body.uuid;
    const distTraveled = parseInt(req.body.dist);
@@ -268,6 +308,15 @@ exports.stop = async (req, res) => {
    });
 };
 
+/**
+ * Function to update a measure, it will replace the current measure's dist and time with the new ones
+ * It will return a 200 status code if the measure is updated
+ * It will return a 400 status code if the request is malformed
+ * It will return a 404 status code if the measure is not found
+ * It will return a 500 status code if an error occurs
+ * @param {*} req request object
+ * @param {*} res response object
+ */
 exports.updateDist = async (req, res) => {
 
    const _uuid = req.body.uuid;
@@ -296,6 +345,15 @@ exports.updateDist = async (req, res) => {
       });
 };
 
+/**
+ * Function to get the distance traveled by a user
+ * It will return a 200 status code with the distance traveled by the user
+ * It will return a 400 status code if the request is malformed
+ * It will return a 404 status code if the user is not found
+ * It will return a 500 status code if an error occurs
+ * @param {*} req request object
+ * @param {*} res response object
+ */
 exports.getUserDist = async (req, res) => {
    const dosNum = parseInt(req.query.dosNumber);
 
@@ -322,6 +380,13 @@ exports.getUserDist = async (req, res) => {
       });
 }
 
+/**
+ * Function to get the distance traveled by all users
+ * It will return a 200 status code with the total distance traveled by all users
+ * It will return a 500 status code if an error occurs
+ * @param {*} req request object
+ * @param {*} res response object
+ */
 exports.getAllDist = async (req, res) => {
    UserMeasure.findAll({
       attributes: [
@@ -341,9 +406,14 @@ exports.getAllDist = async (req, res) => {
    });
 }
 
-
+/**
+ * Function to update a measure. It will replace the current measure's dist and time with the new ones
+ * @param {*} _uuid uuid of the measure to update
+ * @param {*} dist new distance
+ * @param {*} time new time
+ * @returns Promise resolving to the number of rows updated
+ */
 function updateMeasure(_uuid, dist, time) {
-
    return UserMeasure.update({
       distTraveled: dist,
       timeSpent: time

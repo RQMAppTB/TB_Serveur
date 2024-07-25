@@ -1,5 +1,5 @@
 const { DataTypes } = require("sequelize");
-
+// Define the User model
 module.exports = (sequelize, Sequelize) => {
    const User = sequelize.define('Users', {
       dosNumber: {

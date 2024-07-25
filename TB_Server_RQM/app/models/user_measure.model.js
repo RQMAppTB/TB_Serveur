@@ -1,4 +1,5 @@
 const { DataTypes } = require("sequelize");
+// Define the UserMeasure model
 module.exports = (sequelize, Sequelize) => {
    const UserMeasure = sequelize.define('UserMeasure', {
       myUuid: {

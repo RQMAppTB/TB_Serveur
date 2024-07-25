@@ -7,10 +7,23 @@ const { jsonStrMessage } = require("../utils");
 const UserMeasure = db.user_measure;
 const User = db.users;
 
+/**
+ * Function to return a 501 error code to a request
+ * @param {*} req request object 
+ * @param {*} res response object
+ */
 function five0one(req, res) {
    res.status(501).send(jsonStrMessage('Not implemented'));
 };
 
+/**
+ * Function to check the authorization header
+ * If the header is not present or invalid, it will return a 401 error code
+ * If the header is valid, it will call the next function
+ * @param {*} req request object
+ * @param {*} res response object
+ * @param {*} next function to call to forward the request
+ */
 exports.header_check = (req, res, next) => {
    user_id = req.headers['authorization']
 
@@ -26,6 +39,13 @@ exports.header_check = (req, res, next) => {
    }
 };
 
+/**
+ * Function to get all the users and their measures from the database.
+ * It will return a 200 status code with the data if the request is successful
+ * It will return a 500 status code if the request fails
+ * @param {*} req request object
+ * @param {*} res response object
+ */
 exports.get_all_data = (req, res) => {
 
    console.log("get-all-data");
@@ -53,6 +73,14 @@ exports.get_all_data = (req, res) => {
 
 };
 
+/**
+ * Function to get the data of a specific user from the database.
+ * It will return a 200 status code with the data if the request is successful
+ * It will return a 404 status code if the user is not found
+ * It will return a 500 status code if the request fails
+ * @param {*} req request object
+ * @param {*} res the response object
+ */
 exports.get_data = (req, res) => {
    const dosNumber = req.params.dosNum;
 
@@ -91,6 +119,15 @@ exports.get_data = (req, res) => {
    });
 }
 
+/**
+ * Function to get the distance traveled by a specific user from the database.
+ * It will return a 200 status code with the data if the request is successful
+ * It will return a 404 status code if the request is malformed
+ * It will return a 404 status code if the user is not found
+ * It will return a 500 status code if the request fails
+ * @param {*} req request object
+ * @param {*} res response object
+ */
 exports.get_dist = (req, res) => {
    const dosNumber = parseInt(req.params.dosNum);
 
@@ -117,6 +154,15 @@ exports.get_dist = (req, res) => {
 
 };
 
+/**
+ * Function to get the time spent on measures by a specific user from the database.
+ * It will return a 200 status code with the data if the request is successful
+ * It will return a 400 status code if the request is malformed
+ * It will return a 404 status code if the user is not found
+ * It will return a 500 status code if the request fails
+ * @param {*} req request object
+ * @param {*} res response object
+ */
 exports.get_time = (req, res) => {
    const dosNumber = parseInt(req.params.dosNum);
 
@@ -142,6 +188,13 @@ exports.get_time = (req, res) => {
       });
 };
 
+/**
+ * Function to get the totaal distance traveled by all users from the database.
+ * It will return a 200 status code with the data if the request is successful
+ * It will return a 500 status code if the request fails
+ * @param {*} req request object
+ * @param {*} res response object
+ */
 exports.get_total_dist = (req, res) => {
    UserMeasure.findAll({
       attributes: [
@@ -161,6 +214,13 @@ exports.get_total_dist = (req, res) => {
    });
 };
 
+/**
+ * Function to get the total time spent on measures by all users from the database.
+ * It will return a 200 status code with the data if the request is successful
+ * It will return a 500 status code if the request fails
+ * @param {*} req request object
+ * @param {*} res response object
+ */
 exports.get_total_time = (req, res) => {
    UserMeasure.sum('timeSpent')
       .then((sum) => {
@@ -174,10 +234,23 @@ exports.get_total_time = (req, res) => {
       });
 };
 
+/**
+ * Function to get the logs from the server
+ * Not implemented
+ * @param {*} req request object
+ * @param {*} res response object
+ */
 exports.logs = (req, res) => {
    five0one(req, res);
 };
 
+/**
+ * Function to get the number of people currently having a measure active
+ * It will return a 200 status code with the data if the request is successful
+ * It will return a 500 status code if the request fails
+ * @param {*} req request object
+ * @param {*} res response object
+ */
 exports.get_active_number = (req, res) => {
    UserMeasure.sum('number', {
       where: {
@@ -194,6 +267,16 @@ exports.get_active_number = (req, res) => {
    });
 };
 
+/**
+ * Function to create a new user in the database
+ * It will return a 201 status code if the request is successful
+ * It will return a 400 status code if the request is malformed
+ * It will return a 409 status code if the user already exists
+ * It will return a 500 status code if the request fails
+ * @param {*} req request object
+ * @param {*} res response object
+ * @returns 
+ */
 exports.create_participant = (req, res) => {
    const dosNum = parseInt(req.body.dosNumber);
    const username = req.body.username;
@@ -222,6 +305,16 @@ exports.create_participant = (req, res) => {
    });
 };
 
+/**
+ * Create a new measure for a user. The user must exist in the database before calling this function.
+ * The measure will be created with a status of unactive.
+ * It will return a 201 status code if the request is successful
+ * It will return a 400 status code if the request is malformed
+ * It will return a 404 status code if the user is not found
+ * It will return a 500 status code if the request fails
+ * @param {*} req request object
+ * @param {*} res response object
+ */
 exports.add_participant_data = (req, res) => {
    const dosNum = parseInt(req.body.dosNumber);
    const dist = parseInt(req.body.distTraveled);
