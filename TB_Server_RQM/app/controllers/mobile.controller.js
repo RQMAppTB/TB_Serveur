@@ -214,7 +214,9 @@ exports.start = (req, res) => {
       console.log('Error creating measure');
       console.log("error" + error);
       if(error.name === 'SequelizeForeignKeyConstraintError'){
+         console.log('User do not exist');
          res.status(404).send(jsonStrMessage('User does not exist'));
+         return;
       }
       res.status(500).send(jsonStrMessage('Something went wrong on our side'));
    });

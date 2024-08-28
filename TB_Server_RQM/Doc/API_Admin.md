@@ -241,6 +241,29 @@ La route de base pour tous les endpoints de l'application mobile est `/server/da
   - **501 Not Implemented** - Ne sera probablement pas implémenté pour la fin du TB
 <div style="page-break-after: always;"></div>
 
+### Get number of active participant
+ **Endpoint:** `/get-active-number`
+- **Method:** `GET`
+- **Description:** Permet d'obtenir le nombre de personnes en train de faire une mesure.
+- **Headers:**
+  - `Authorization: user_id`
+- **Query Parameters:**
+  - `none`
+- **Responses:**
+  - **200 Created**
+    ```json
+    {
+      "number": 2
+    }
+    ```
+  - **500 Internal Server Error**
+    ```json
+    {
+      "message": "Something went wrong on our side"
+    }
+    ```
+<div style="page-break-after: always;"></div>
+
 ### Create a new participant
 - **Endpoint:** `/create-participant`
 - **Method:** `POST`
