@@ -1,27 +1,37 @@
 version: '3.8'
 
 services:
+  proxy:
+    image: 'jc21/nginx-proxy-manager:latest'
+    restart: unless-stopped
+    ports:
+      - '80:80' # Public HTTP Port
+      - '443:443' # Public HTTPS Port
+      - '81:81' # Admin Web Port
+    volumes:
+      - ./proxy-data:/data
+      - ./proxy-letsencrypt:/etc/letsencrypt
 
   api:
     build: .
-    ports:
-      - "3000:3000"
+    restart: unless-stopped
+    # ports:
+    #   - "3000:3000"
     env_file: ".env"
     depends_on:
       db:
         condition: service_healthy
     volumes:
-      - logs:/usr/src/app/logs
+      - ./logs:/usr/src/app/logs
 
   db:
-    image: mysql:5.7
+    image: mariadb:latest
+    restart: unless-stopped
     environment:
       MYSQL_ROOT_PASSWORD: rootpassword
       MYSQL_DATABASE: mydb
     volumes:
-      - db-data:/var/lib/mysql
-    ports:
-      - "3306:3306"
+      - ./db-data:/var/lib/mysql
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
       start_period: 300s
@@ -31,13 +41,10 @@ services:
       retries: 10
 
   phpmyadmin:
-    image: phpmyadmin/phpmyadmin
+    image: phpmyadmin/phpmyadmin:latest
     environment:
       PMA_HOST: db
       MYSQL_ROOT_PASSWORD: rootpassword
-    ports:
-      - "8080:80"
+    # ports:
+    #   - "8080:80"
 
-volumes:
-  db-data:
-  logs:
